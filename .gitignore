@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+/backend/venv
+*.pyd
+*.pyc
+__pycache__/
+
+# Environment variables
+.env
+.env.local
+
+# Build files
+/build
+/dist
+
+# IDE files
+.idea/
+.vscode/
+
+# AWS credentials
+aws_credentials.json
+
+# Logs
+*.log
+
+# Other files
+.DS_Store
+Thumbs.db
