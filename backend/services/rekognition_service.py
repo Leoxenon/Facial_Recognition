@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 import logging
+from config import Config
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
@@ -40,8 +41,8 @@ except ClientError as e:
 def index_face(image_url):
     try:
         response = rekognition_client.index_faces(
-            CollectionId=settings.COLLECTION_ID,
-            Image={'S3Object': {'Bucket': settings.S3_BUCKET, 'Name': image_url}},
+            CollectionId=Config.COLLECTION_ID,
+            Image={'S3Object': {'Bucket': Config.S3_BUCKET, 'Name': image_url}},
             MaxFaces=1,
             QualityFilter="AUTO",
             DetectionAttributes=['ALL']
@@ -56,7 +57,7 @@ def index_face(image_url):
 def verify_face(image_bytes, face_id):
     try:
         response = rekognition_client.search_faces_by_image(
-            CollectionId=settings.COLLECTION_ID,
+            CollectionId=Config.COLLECTION_ID,
             Image={'Bytes': image_bytes},
             MaxFaces=1,
             FaceMatchThreshold=95
@@ -68,7 +69,7 @@ def verify_face(image_bytes, face_id):
         print(f"Error verifying face: {e}")
         return False
 
-def create_collection(collection_id=settings.COLLECTION_ID):
+def create_collection(collection_id=Config.COLLECTION_ID):
     try:
         rekognition_client.create_collection(CollectionId=collection_id)
         print(f"Collection {collection_id} created.")

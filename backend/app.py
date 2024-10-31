@@ -17,11 +17,22 @@ CORS(app)  # 允许所有来源的请求
 app.register_blueprint(auth.bp)
 app.register_blueprint(user.bp)
 
-s3_service = s3_service.S3Service()
-db_service = dynamodb_service.DynamoDBService()
+# 直接使用模块中的函数，而不是类
+s3 = s3_service
+db = dynamodb_service
+
+# 添加错误处理装饰器
+def handle_errors(f):
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    return wrapper
 
 api = Api(app, version='1.0', title='Facial Auth API',
-    description='A facial recognition authentication API'
+    description='A facial recognition authentication API',
+    prefix='/api'
 )
 
 auth_ns = api.namespace('auth', description='Authentication operations')
@@ -42,7 +53,7 @@ def handle_file_upload(request_files, field_name):
         
     return file, None
 
-@app.route("/detect_faces/", methods=['POST'])
+@app.route("/api/detect_faces/", methods=['POST'])
 @handle_errors
 def detect_faces():
     try:
@@ -69,7 +80,7 @@ def detect_faces():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/compare_faces/", methods=['POST'])
+@app.route("/api/compare_faces/", methods=['POST'])
 def compare_faces():
     if 'source' not in request.files or 'target' not in request.files:
         return jsonify({"error": "Missing source or target file"}), 400
@@ -86,7 +97,7 @@ def compare_faces():
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
-@app.route("/upload_face/", methods=['POST'])
+@app.route("/api/upload_face/", methods=['POST'])
 def upload_face():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -96,7 +107,7 @@ def upload_face():
     if file:
         try:
             contents = file.read()
-            file_url = s3_service.upload_file(io.BytesIO(contents), file.filename)
+            file_url = s3.upload_file(io.BytesIO(contents), file.filename)
             faces = rekognition_service.detect_faces(contents)
 
             if len(faces) != 1:
@@ -109,7 +120,7 @@ def upload_face():
                 "ImageURL": file_url,
                 "Confidence": faces[0]['Confidence']
             }
-            db_service.add_entry(db_entry)
+            db.add_entry(db_entry)
 
             return jsonify({"message": "Face uploaded and indexed successfully", "face_id": face_id})
         except Exception as e:
@@ -119,7 +130,7 @@ def upload_face():
 rekognition_service.create_collection()
 
 # 创建 DynamoDB 表（如果不存在）
-db_service.create_table_if_not_exists()
+db.create_table_if_not_exists()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -8,14 +8,20 @@ const __dirname = dirname(__filename);
 // 启动 Flask 后端
 const startBackend = () => {
   console.log('正在启动后端服务器...');
-  const backend = spawn('python', ['backend/app.py'], {
+  const pythonPath = join(__dirname, 'venv', 'Scripts', 'python.exe');
+  const appPath = join(__dirname, 'backend', 'app.py');
+  
+  console.log('Python路径:', pythonPath);
+  console.log('应用路径:', appPath);
+  
+  const backend = spawn(pythonPath, [appPath], {
     stdio: 'inherit',
     shell: true,
     env: { 
       ...process.env, 
       FLASK_APP: 'app.py',
       FLASK_ENV: 'development',
-      PYTHONPATH: dirname(__filename) + '/backend'
+      PYTHONPATH: join(__dirname, 'backend')
     }
   });
 
@@ -25,11 +31,17 @@ const startBackend = () => {
       reject(err);
     });
 
-    // 等待一段时间确保后端启动
+    backend.on('exit', (code) => {
+      if (code !== 0) {
+        console.error(`后端进程异常退出，退出码: ${code}`);
+        reject(new Error(`Backend exited with code ${code}`));
+      }
+    });
+
     setTimeout(() => {
       console.log('后端服务器已启动');
       resolve(backend);
-    }, 2000);
+    }, 5000);
   });
 };
 

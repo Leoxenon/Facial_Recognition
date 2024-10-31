@@ -13,7 +13,8 @@ class Config:
     
     FACE_MATCH_THRESHOLD = 95.0
     MAX_FACES = 1
-    
+
+
 class DevelopmentConfig(Config):
     DEBUG = True
     

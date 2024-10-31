@@ -6,16 +6,16 @@ export const validatePassword = (password) => {
     const hasSpecialChar = /[!@#$%^&*]/.test(password);
     
     if (password.length < minLength) {
-        return '密码长度至少为8个字符';
+        return 'Password length is at least 8 characters';
     }
     if (!hasUpperCase || !hasLowerCase) {
-        return '密码必须包含大小写字母';
+        return 'Password must contain upper and lower case letters';
     }
     if (!hasNumbers) {
-        return '密码必须包含数字';
+        return 'Password must contain numbers';
     }
     if (!hasSpecialChar) {
-        return '密码必须包含特殊字符';
+        return 'Password must contain special characters';
     }
     
     return null;

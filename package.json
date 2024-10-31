@@ -4,7 +4,9 @@
   "type": "module",
   "proxy": "http://localhost:5000",
   "scripts": {
-    "start": "SET NODE_OPTIONS=--openssl-legacy-provider && node server.js",
+    "start-frontend": "SET NODE_OPTIONS=--openssl-legacy-provider && node server.js",
+    "start-backend": "cd backend && ..\\venv\\Scripts\\python.exe app.py",
+    "start": "concurrently \"npm run start-frontend\" \"npm run start-backend\"",
     "start:frontend": "SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -30,6 +32,7 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^9.0.1",
     "open": "^10.1.0"
   }
 }

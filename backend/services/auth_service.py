@@ -6,9 +6,10 @@ from utils.s3 import upload_image_to_s3
 import logging
 import base64
 import uuid
-from services.face_utils import validate_face_image
+from services.face_utils import validate_face_image, verify_face_identity
 from exceptions.auth_exceptions import AuthenticationError, FaceRecognitionError
-from services.session_service import create_session_token
+from services.session_service import create_session_token, refresh_token as refresh_session_token
+from services.user_service import get_user_by_face_id, check_user_exists, create_user, update_user_password
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -74,3 +75,14 @@ def recover_password(username, face_image, new_password):
     except (AuthenticationError, FaceRecognitionError) as e:
         logger.error(f"Password recovery error: {str(e)}")
         return {'success': False, 'message': str(e)}
+
+def validate_password(password):
+    if len(password) < 8:
+        return "Password must be at least 8 characters long"
+    if not any(c.isupper() for c in password):
+        return "Password must contain at least one uppercase letter"
+    if not any(c.islower() for c in password):
+        return "Password must contain at least one lowercase letter"
+    if not any(c.isdigit() for c in password):
+        return "Password must contain at least one number"
+    return None

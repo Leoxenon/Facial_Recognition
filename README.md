@@ -99,6 +99,12 @@ cd backend && flask run
 - Real-time face detection confidence scoring
 - Secure session management
 - Input validation and sanitization
+- Rate limiting protection (60 requests per minute)
+- Swagger UI API documentation
+- Cross-Origin Resource Sharing (CORS) support
+- JWT-based session management
+- Face quality validation
+- Comprehensive error handling and logging
 
 ## Technology Stack
 
@@ -118,12 +124,24 @@ cd backend && flask run
   - Amazon S3
   - Amazon DynamoDB
   - AWS IAM
+  
+### Backend Additional Components
+- Flask-RESTX for Swagger UI
+- PyJWT for token management
+- Werkzeug for password hashing
+- Python-dotenv for environment management
 
 ### Development Tools
 - Node.js
 - npm
 - Python virtual environment
 - Git version control
+
+### Backend Additional Components
+- Flask-RESTX for Swagger UI
+- PyJWT for token management
+- Werkzeug for password hashing
+- Python-dotenv for environment management
 
 ## Architecture
 
@@ -252,6 +270,8 @@ Response:
    - Request: Multipart form data with 'file'
    - Response: { message, face_id }
 
+4. POST /api/auth/refresh-token - Token refresh
+
 #### Detect Faces
 ```http
 POST /detect_faces/
@@ -335,6 +355,14 @@ Authorization: Bearer <token>
 - Face detection timeout: 30 seconds
 - Maximum image size: 1MB
 
+### API Endpoints
+- POST /api/auth/register - User registration
+- POST /api/auth/login - User authentication
+- POST /api/auth/recover-password - Password recovery
+- POST /api/auth/refresh-token - Token refresh
+- POST /api/detect_faces - Face detection
+- POST /api/compare_faces - Face comparison
+- POST /api/upload_face - Face enrollment
 
 ## Security Features
 
@@ -359,6 +387,18 @@ Authorization: Bearer <token>
 - IAM role-based access
 - S3 bucket encryption
 - DynamoDB encryption at rest
+
+### Rate Limiting
+- Maximum 60 requests per minute per IP
+- Time window: 60 seconds
+- Automatic request cleanup
+Reference: backend/middleware/rate_limit.py (lines 6-25)
+
+### Request Validation
+- Required field validation
+- Image format validation
+- Face quality checks
+Reference: backend/middleware/validators.py (lines 1-54)
 
 ## Development Guidelines
 
@@ -397,6 +437,16 @@ Common error codes and solutions:
 - 401: Authentication failed
 - 403: Insufficient permissions
 - 500: Internal server error
+
+### Custom Exception Types
+- AuthenticationError: Authentication-related failures
+- FaceRecognitionError: Face detection/recognition issues
+Reference: backend/exceptions/auth_exceptions.py (lines 1-10)
+
+### Global Error Handler
+- Centralized error handling
+- Consistent error response format
+Reference: backend/app.py (lines 24-31)
 
 ## Troubleshooting
 

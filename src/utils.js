@@ -20,7 +20,10 @@ export const handleRegister = async (username, password, faceImage) => {
             body: JSON.stringify({ username, password, faceImage }),
         });
         const data = await response.json();
-        return response.ok;
+        if (response.ok) {
+            return { success: true, data };
+        }
+        return handleApiError(new Error(data.message), 'Registration');
     } catch (error) {
         return handleApiError(error, 'Registration');
     }

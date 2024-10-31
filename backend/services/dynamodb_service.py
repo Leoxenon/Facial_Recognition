@@ -1,8 +1,8 @@
 import boto3
 from botocore.exceptions import ClientError
-from config import settings
+from config import Config
 import os
-from botocore.config import Config
+from botocore.config import Config as BotoConfig
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -19,9 +19,9 @@ class DynamoDBService:
                                        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                                        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
                                        region_name=os.getenv('AWS_REGION'),
-                                       config=Config(signature_version='v4')
+                                       config=BotoConfig(signature_version='v4')
                                        )
-        self.table = self.dynamodb.Table(settings.DYNAMODB_TABLE)
+        self.table = self.dynamodb.Table(Config.DYNAMODB_TABLE)
 
     def add_entry(self, item):
         try:
@@ -55,7 +55,7 @@ class DynamoDBService:
     def create_table_if_not_exists(self):
         try:
             self.dynamodb.create_table(
-                TableName=settings.DYNAMODB_TABLE,
+                TableName=Config.DYNAMODB_TABLE,
                 KeySchema=[
                     {
                         'AttributeName': 'FaceID',
@@ -73,6 +73,6 @@ class DynamoDBService:
                     'WriteCapacityUnits': 5
                 }
             )
-            print(f"Table {settings.DYNAMODB_TABLE} created successfully.")
+            print(f"Table {Config.DYNAMODB_TABLE} created successfully.")
         except self.dynamodb.meta.client.exceptions.ResourceInUseException:
-            print(f"Table {settings.DYNAMODB_TABLE} already exists.")
+            print(f"Table {Config.DYNAMODB_TABLE} already exists.")
